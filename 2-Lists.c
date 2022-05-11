@@ -2,20 +2,18 @@
 #include <stdlib.h>
 
 // Example 1
-
 struct Node
 {
-    int valor;
-    struct Node *prox;
+    int value;
+    struct Node *next;
 };
 typedef struct Node Node;
 
 // Example 2
-
 struct package
 {
     int id;
-    struct package *prox;
+    struct package *next;
 };
 typedef struct package Package;
 
@@ -26,51 +24,79 @@ Package *init()
 }
 
 // Inserting always on the first position
-void inserir(Node *node, int valor)
+void first_insert(Node *node, int value)
 {
     Node *newNode;
     newNode = (Node *)malloc(sizeof(Node));
-    newNode->valor = valor;
-    newNode->prox = node;
+    newNode->value = value;
+    newNode->next = node;
 }
 
 // Inserting on the last position
 Package *insert(Package *p, int id)
 {
-    Package *novo = (Package *)malloc(sizeof(Package));
-    novo->id = id;
-    novo->prox = NULL;
+    Package *new_package = (Package *)malloc(sizeof(Package));
+    new_package->id = id;
+    new_package->next = NULL;
 
+    // In case the list is empty, inserts it already
     if (p == NULL)
     {
-        return novo;
+        return new_package;
     }
     else
     {
         Package *i = p;
-        while (i->prox != NULL)
+        // Iterates to last position
+        while (i->next != NULL)
         {
-            i = i->prox;
+            i = i->next;
         }
-        i->prox = novo;
+        // Insertion
+        i->next = new_package;
     }
     return p;
 }
 
-int buscar(Node *node, int valor)
+Package *search(Package *node, int id)
 {
-    // Caso chegue ao final da lista, retorna null
+    // This represents that the entire list was searched
     if (node == NULL)
     {
-        return 0;
+        printf("Id %d was not found\n", id);
+        return NULL;
     }
-    // Caso ache o valor procurado
-    if (node->valor == valor)
+
+    // Returns the node if found
+    if (node->id == id)
     {
-        return 1;
+        printf("Value %d was found\n", node->id);
+        return node;
     }
-    // Caso nenhum desses dois seja satisfeito, passa para o próximo valor
-    return buscar(node->prox, valor);
+
+    // Else, search calls itself and checks the next node
+    return search(node->next, id);
+}
+
+Package *delete (Package *node, int id)
+{
+    // In case all of the list was searched and element was not found
+    if (node->next == NULL)
+    {
+        printf("Value was not found\n");
+        return NULL;
+    }
+
+    if (node->next->id == id)
+    {
+        Package *trash;
+        trash = node->next; // stores position in aux variable
+        node->next = trash->next;
+        free(trash);
+        printf("Value was deleted successfully\n");
+        return node;
+    }
+    return delete (node->next, id);
 }
 
 int main()
@@ -82,12 +108,12 @@ int main()
     a = (Node *)malloc(sizeof(Node));
     b = (Node *)malloc(sizeof(Node));
 
-    a->valor = 3;
-    b->valor = 5;
-    a->prox = b;
-    b->prox = NULL;
-    printf("%d ", a->valor);
-    printf("%d ", a->prox->valor);
+    a->value = 3;
+    b->value = 5;
+    a->next = b;
+    b->next = NULL;
+    printf("%d ", a->value);
+    printf("%d ", a->next->value);
 
     // Example 2
     Package *p = init();
@@ -95,11 +121,32 @@ int main()
     p = insert(p, 9);
     p = insert(p, 100);
 
+    // Prints the entire list
     printf("\nPackages: ");
-    for (Package *i = p; i != NULL; i = i->prox)
+    for (Package *i = p; i != NULL; i = i->next)
     {
         printf("%d ", i->id);
     }
+    printf("\n");
+
+    // Search for an element inside the list
+    Package *search_num;
+
+    search_num = search(p, 9);
+    search_num = search(p, 3);
+
+    // Remove element from linked list
+    Package *delete_result;
+    delete_result = delete (p, 9);
+    delete_result = delete (p, 42);
+
+    // Print
+    printf("\nPackages: ");
+    for (Package *i = p; i != NULL; i = i->next)
+    {
+        printf("%d ", i->id);
+    }
+    printf("\n");
 
     return 0;
 }
